@@ -156,7 +156,7 @@ namespace SQLRecon.Modules
             Sql.Query(con, queries["drop_assembly"]);
 
             // Create a new custom assembly with the randomly generated name.
-            Sql.Query(con, queries["create_assembly"]);
+            sqlOutput = Sql.Query(con, queries["create_assembly"]);
 
             // Check to see if the custom assembly has been created
             sqlOutput = Sql.Query(con, queries["list_assembly"]);
@@ -230,7 +230,8 @@ namespace SQLRecon.Modules
 
             // Executing new custom assembly and stored procedure.
             Print.Status("Executing payload ...", true);
-            Sql.Query(con, queries["execute_clr_payload"]);
+            sqlOutput = Sql.Query(con, queries["execute_clr_payload"]);
+            sqloutput = Print.Status(sqlOutput, true);
 
             // Cleaning up.
             Print.Status($"Cleaning up. Deleting assembly '{assem}', stored procedure '{function}' and trusted assembly hash '{dllPath}'.", true);
@@ -496,11 +497,17 @@ namespace SQLRecon.Modules
                     }
                 }
 
+                byte[] fileBytes = File.ReadAllBytes(dll);
+                dllBytes = BitConverter.ToString(fileBytes).Replace("-", "");
+
                 // Read the local dll as bytes and store into the dllBytes variable, otherwise, the DLL will need to be on the SQL server.
-                foreach (Byte b in File.ReadAllBytes(dll))
+                /* foreach (Byte b in File.ReadAllBytes(dll))
                 {
+                    if (dllBytes.Length > 700000)
+                    Print.Error($"dllBytes.Length {dllBytes.Length}", true);
+
                     dllBytes += b.ToString("X2");
-                }
+                } */
 
             }
             catch (FileNotFoundException)
